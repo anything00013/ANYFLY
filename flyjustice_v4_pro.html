@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:transparent;color:var(--color-text-primary)}
+.app{max-width:700px;padding:0}
+
+/* HERO */
+.hero{padding:2rem 0 1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:2rem}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.logo-icon{width:32px;height:32px;background:#185FA5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.logo-text{font-size:20px;font-weight:600;color:var(--color-text-primary)}
+.hero-title{font-size:26px;font-weight:600;line-height:1.3;margin-bottom:8px}
+.hero-title span{color:#185FA5}
+.hero-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.25rem;line-height:1.6}
+.trust-row{display:flex;gap:1.5rem;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary)}
+.trust-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75}
+
+/* COMP CALC */
+.calc-card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem;margin-bottom:2rem}
+.calc-title{font-size:15px;font-weight:500;margin-bottom:1rem}
+.calc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.calc-result{display:none;margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary)}
+.calc-amt{font-size:32px;font-weight:600;color:#1D9E75}
+.calc-label{font-size:13px;color:var(--color-text-secondary);margin-top:4px}
+.calc-btn{margin-top:1rem}
+
+/* PROGRESS */
+.progress-wrap{margin-bottom:2rem}
+.progress-steps{display:flex;align-items:center;gap:0;margin-bottom:1rem}
+.ps{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.ps-circle{width:28px;height:28px;border-radius:50%;border:2px solid var(--color-border-secondary);background:var(--color-background-primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);position:relative;z-index:1}
+.ps-circle.done{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.ps-circle.active{background:#185FA5;border-color:#185FA5;color:#fff}
+.ps-label{font-size:10px;color:var(--color-text-secondary);margin-top:4px;text-align:center;white-space:nowrap}
+.ps-label.active{color:#185FA5;font-weight:500}
+.ps-line{position:absolute;top:14px;left:50%;right:-50%;height:2px;background:var(--color-border-tertiary);z-index:0}
+.ps-line.done{background:#1D9E75}
+.ps:last-child .ps-line{display:none}
+
+/* STEPS */
+.step{display:none}.step.active{display:block}
+.step-header{margin-bottom:1.5rem}
+.step-title{font-size:18px;font-weight:500;margin-bottom:4px}
+.step-desc{font-size:13px;color:var(--color-text-secondary)}
+
+/* FORMS */
+.fld{margin-bottom:1.25rem}
+.lbl{font-size:13px;color:var(--color-text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.req{color:#A32D2D;font-size:11px}
+input,select,textarea{width:100%;font-family:var(--font-sans);font-size:14px}
+textarea{resize:vertical;min-height:80px}
+.hint{font-size:11px;color:var(--color-text-secondary);margin-top:4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.other-inp{display:none;margin-top:8px}
+
+/* CARDS */
+.info-card{background:#E6F1FB;border:0.5px solid #85B7EB;border-radius:var(--border-radius-md);padding:12px 14px;font-size:13px;color:#185FA5;margin-bottom:1.25rem;line-height:1.6}
+.warn-card{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:12px 14px;font-size:13px;color:#854F0B;margin-bottom:1.25rem;line-height:1.6}
+.success-card{background:#EAF3DE;border:0.5px solid #7ABD45;border-radius:var(--border-radius-md);padding:12px 14px;font-size:13px;color:#3B6D11;margin-bottom:1.25rem;line-height:1.6}
+.error-card{background:#FCEBEB;border:0.5px solid #E87070;border-radius:var(--border-radius-md);padding:12px 14px;font-size:13px;color:#A32D2D;margin-bottom:1.25rem;line-height:1.6}
+
+/* ELIG RESULT */
+.elig-big{text-align:center;padding:1.5rem;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);margin-bottom:1.5rem}
+.elig-icon{font-size:32px;margin-bottom:8px}
+.elig-amt{font-size:36px;font-weight:700;color:#1D9E75;margin:8px 0 4px}
+.elig-title{font-size:16px;font-weight:500;margin-bottom:4px}
+.elig-sub{font-size:13px;color:var(--color-text-secondary)}
+
+/* PASSENGERS */
+.passenger-card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1rem;margin-bottom:1rem}
+.pax-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.pax-title{font-size:14px;font-weight:500}
+.pax-remove{font-size:12px;color:#A32D2D;cursor:pointer;background:none;border:none}
+.add-pax{font-size:13px;color:#185FA5;cursor:pointer;background:none;border:0.5px solid #85B7EB;padding:8px 16px;border-radius:var(--border-radius-md);margin-bottom:1.25rem;width:100%;text-align:center}
+
+/* SECTION */
+.sec-sep{border-top:0.5px solid var(--color-border-tertiary);margin:1.5rem 0 1.5rem;padding-top:1.5rem}
+.sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-secondary);margin-bottom:1rem}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.5rem}
+.btn{font-size:14px;padding:10px 20px;border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);font-family:var(--font-sans)}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#185FA5;color:#E6F1FB;border-color:#185FA5;font-weight:500}
+.btn-primary:hover{background:#0C447C}
+.btn-sm{font-size:12px;padding:6px 14px}
+.btn-ghost{color:#185FA5;border-color:#85B7EB}
+
+/* DOCS */
+.tab-bar{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:0}
+.tab-btn{font-size:13px;padding:8px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px}
+.tab-btn.active{color:#185FA5;border-bottom-color:#185FA5;font-weight:500}
+.doc-letter{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1.25rem;font-size:13px;line-height:1.9;color:var(--color-text-primary);white-space:pre-wrap;max-height:320px;overflow-y:auto;margin-bottom:1rem;font-family:var(--font-mono)}
+.guide-step{display:flex;gap:12px;margin-bottom:1.25rem}
+.gs-num{min-width:28px;height:28px;border-radius:50%;background:#185FA5;color:#E6F1FB;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.gs-num.done{background:#1D9E75}
+.gs-body{}
+.gs-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.gs-desc{font-size:13px;color:var(--color-text-secondary);line-height:1.6}
+.gs-link{font-size:12px;color:#185FA5;text-decoration:none;margin-top:4px;display:inline-block}
+
+/* SUMMARY */
+.summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
+.summary-row:last-child{border:none}
+.summary-label{color:var(--color-text-secondary)}
+.summary-val{font-weight:500;text-align:right;max-width:60%}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="logo-row">
+      <div class="logo-icon">✈</div>
+      <div class="logo-text">FlyJustice</div>
+    </div>
+    <div class="hero-title">Get up to <span>£520 compensation</span><br>for your delayed or cancelled flight</div>
+    <div class="hero-sub">UK261 law entitles all passengers departing UK airports to fixed compensation. AirHelp takes 35% of your money. We help you claim 100% yourself — completely free.</div>
+    <div class="trust-row">
+      <div class="trust-item"><div class="trust-dot"></div>100% free — keep all your money</div>
+      <div class="trust-item"><div class="trust-dot"></div>Works for all nationalities</div>
+      <div class="trust-item"><div class="trust-dot"></div>No account needed</div>
+      <div class="trust-item"><div class="trust-dot"></div>Takes 5 minutes</div>
+    </div>
+  </div>
+
+  <!-- QUICK CALC -->
+  <div class="calc-card">
+    <div class="calc-title">⚡ Quick compensation check</div>
+    <div class="calc-row">
+      <div class="fld" style="margin:0">
+        <label class="lbl">What happened?</label>
+        <select id="qIssue">
+          <option value="">Select</option>
+          <option value="delay3">Delay 3–4 hours</option>
+          <option value="delay4">Delay 4+ hours</option>
+          <option value="cancel">Cancelled flight</option>
+          <option value="denied">Denied boarding</option>
+          <option value="delay2">Delay 2–3 hours</option>
+          <option value="delay1">Delay under 2 hours</option>
+        </select>
+      </div>
+      <div class="fld" style="margin:0">
+        <label class="lbl">Flight distance</label>
+        <select id="qDist">
+          <option value="">Select</option>
+          <option value="short">Under 1,500 km</option>
+          <option value="mid">1,500–3,500 km</option>
+          <option value="long">Over 3,500 km</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="quickCalc()">Check my compensation</button>
+    <div class="calc-result" id="calcResult"></div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-wrap">
+    <div class="progress-steps">
+      <div class="ps" id="ps1">
+        <div class="ps-line" id="pl1"></div>
+        <div class="ps-circle active" id="pc1">1</div>
+        <div class="ps-label active" id="pn1">Flight</div>
+      </div>
+      <div class="ps" id="ps2">
+        <div class="ps-line" id="pl2"></div>
+        <div class="ps-circle" id="pc2">2</div>
+        <div class="ps-label" id="pn2">Disruption</div>
+      </div>
+      <div class="ps" id="ps3">
+        <div class="ps-line" id="pl3"></div>
+        <div class="ps-circle" id="pc3">3</div>
+        <div class="ps-label" id="pn3">Passengers</div>
+      </div>
+      <div class="ps" id="ps4">
+        <div class="ps-line" id="pl4"></div>
+        <div class="ps-circle" id="pc4">4</div>
+        <div class="ps-label" id="pn4">Review</div>
+      </div>
+      <div class="ps">
+        <div class="ps-circle" id="pc5">5</div>
+        <div class="ps-label" id="pn5">Documents</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: FLIGHT -->
+  <div class="step active" id="step1">
+    <div class="step-header">
+      <div class="step-title">Your flight details</div>
+      <div class="step-desc">Enter your flight information exactly as shown on your booking confirmation</div>
+    </div>
+    <div class="info-card">✅ UK261 covers all passengers departing any UK airport — any nationality, any airline</div>
+    <div class="row2">
+      <div class="fld">
+        <label class="lbl">Flight number <span class="req">*</span></label>
+        <input type="text" id="flightNum" placeholder="e.g. BA245" oninput="this.value=this.value.toUpperCase()"/>
+        <div class="hint">On boarding pass or booking email</div>
+      </div>
+      <div class="fld">
+        <label class="lbl">Date of flight <span class="req">*</span></label>
+        <input type="date" id="flightDate"/>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="fld">
+        <label class="lbl">Departure airport <span class="req">*</span></label>
+        <input type="text" id="depAirport" placeholder="e.g. London Heathrow (LHR)"/>
+      </div>
+      <div class="fld">
+        <label class="lbl">Arrival airport <span class="req">*</span></label>
+        <input type="text" id="arrAirport" placeholder="e.g. New York JFK"/>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="fld">
+        <label class="lbl">Airline <span class="req">*</span></label>
+        <select id="airline" onchange="toggleOther()">
+          <option value="">Select airline</option>
+          <option>British Airways</option><option>easyJet</option><option>Ryanair</option>
+          <option>Wizz Air</option><option>Jet2</option><option>TUI Airways</option>
+          <option>Virgin Atlantic</option><option>Loganair</option><option>Aer Lingus</option>
+          <option>Lufthansa</option><option>Air France</option><option>KLM</option>
+          <option>Emirates</option><option>Qatar Airways</option><option>Turkish Airlines</option>
+          <option>Air India</option><option>United Airlines</option><option>American Airlines</option>
+          <option>Delta Air Lines</option><option>Singapore Airlines</option><option>Etihad Airways</option>
+          <option value="other">Other airline</option>
+        </select>
+        <div class="other-inp" id="otherAirlineBox">
+          <input type="text" id="otherAirline" placeholder="Type airline name"/>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lbl">Booking reference <span class="req">*</span></label>
+        <input type="text" id="bookingRef" placeholder="e.g. XY4729" oninput="this.value=this.value.toUpperCase()"/>
+        <div class="hint">In your confirmation email</div>
+      </div>
+    </div>
+    <div class="fld">
+      <label class="lbl">Flight distance <span class="req">*</span></label>
+      <select id="distance" onchange="toggleCustomDist()">
+        <option value="">Select approximate distance</option>
+        <option value="400">Under 500 km — UK domestic flights</option>
+        <option value="750">500–1,000 km — UK to Ireland, Netherlands, Belgium</option>
+        <option value="1200">1,000–1,500 km — UK to Spain, Portugal, Italy, France</option>
+        <option value="1750">1,500–2,000 km — UK to Greece, Cyprus, Canary Islands</option>
+        <option value="2200">2,000–2,500 km — UK to Egypt, Morocco, Tunisia</option>
+        <option value="2800">2,500–3,500 km — UK to UAE, Israel, Jordan</option>
+        <option value="5000">3,500–6,000 km — UK to India, Thailand, West Africa</option>
+        <option value="7500">6,000–9,000 km — UK to USA, Canada, China, East Africa</option>
+        <option value="10000">Over 9,000 km — UK to Australia, New Zealand, Japan</option>
+        <option value="custom">I know the exact distance in km</option>
+      </select>
+      <div class="other-inp" id="distCustomBox">
+        <input type="number" id="distCustomVal" placeholder="Enter exact distance in km"/>
+      </div>
+      <div class="hint">Not sure? Search "[departure city] to [arrival city] km" on Google</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep2()">Continue to disruption details →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: DISRUPTION -->
+  <div class="step" id="step2">
+    <div class="step-header">
+      <div class="step-title">What happened to your flight?</div>
+      <div class="step-desc">Be as accurate as possible — this affects your eligibility and compensation amount</div>
+    </div>
+    <div class="fld">
+      <label class="lbl">Type of disruption <span class="req">*</span></label>
+      <select id="issue" onchange="toggleIssueFields()">
+        <option value="">Select what happened</option>
+        <option value="delay">Flight arrived late at destination</option>
+        <option value="cancel">Flight was cancelled</option>
+        <option value="denied">Denied boarding — flight was overbooked</option>
+        <option value="missed">Missed connection caused by the airline</option>
+      </select>
+    </div>
+    <div id="delayBlock" style="display:none">
+      <div class="fld">
+        <label class="lbl">How late did you arrive at your destination? <span class="req">*</span></label>
+        <select id="delayHours">
+          <option value="">Select delay at arrival</option>
+          <option value="0.5">Less than 1 hour late</option>
+          <option value="1">1–2 hours late</option>
+          <option value="2">2–3 hours late</option>
+          <option value="3">3–4 hours late</option>
+          <option value="4">4–5 hours late</option>
+          <option value="5">5+ hours late</option>
+        </select>
+        <div class="hint">UK261 uses actual arrival time at destination — not when the plane left the gate</div>
+      </div>
+    </div>
+    <div id="cancelBlock" style="display:none">
+      <div class="fld">
+        <label class="lbl">When were you told the flight was cancelled? <span class="req">*</span></label>
+        <select id="cancelNotice">
+          <option value="">Select</option>
+          <option value="day_of">On the day of travel (less than 24 hours notice)</option>
+          <option value="less7">Less than 7 days before departure</option>
+          <option value="7to14">Between 7 and 14 days before departure</option>
+          <option value="more14">More than 14 days before departure</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label class="lbl">Were you offered an alternative flight?</label>
+        <select id="altFlight">
+          <option value="no">No alternative offered</option>
+          <option value="yes_same">Yes — arrived within 2 hours of original time</option>
+          <option value="yes_late">Yes — but arrived much later than original</option>
+          <option value="refund">Offered a refund only</option>
+        </select>
+      </div>
+    </div>
+    <div class="fld">
+      <label class="lbl">What reason did the airline give?</label>
+      <select id="airlineReason">
+        <option value="none">No reason given</option>
+        <option value="technical">Technical / mechanical fault</option>
+        <option value="staff">Staff shortage or crew issues</option>
+        <option value="weather">Weather conditions</option>
+        <option value="atc">Air traffic control restrictions</option>
+        <option value="strike_airline">Airline staff strike</option>
+        <option value="strike_other">Third party strike (airport, ATC)</option>
+        <option value="other_reason">Other reason</option>
+      </select>
+      <div class="hint">Weather and ATC strikes are "extraordinary circumstances" — airlines use these to avoid paying. We handle this in your letter.</div>
+    </div>
+    <div class="fld">
+      <label class="lbl">What did the airline provide during the disruption?</label>
+      <select id="airlineOffer" onchange="checkVoucherWarn()">
+        <option value="nothing">Nothing at all</option>
+        <option value="info">Information/updates only</option>
+        <option value="meals">Meals or refreshments</option>
+        <option value="hotel">Hotel accommodation</option>
+        <option value="meals_hotel">Meals and hotel</option>
+        <option value="voucher">Travel voucher (did NOT sign anything)</option>
+        <option value="voucher_signed">Travel voucher (signed a document)</option>
+        <option value="partial">Partial cash payment</option>
+        <option value="rebooked">Rebooked on later flight</option>
+      </select>
+    </div>
+    <div id="voucherWarn" style="display:none" class="warn-card">⚠️ <strong>Important:</strong> If you signed a waiver when accepting the voucher, your cash claim may be affected. Check the document carefully. Many voucher agreements do not contain valid legal waivers — your letter will address this.</div>
+    <div class="fld">
+      <label class="lbl">Have you already contacted the airline about compensation?</label>
+      <select id="prevContact">
+        <option value="no">No — this is my first contact</option>
+        <option value="ignored">Yes — they ignored my claim</option>
+        <option value="rejected">Yes — they rejected my claim</option>
+        <option value="pending">Yes — still waiting for a response</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label class="lbl">Additional details (optional)</label>
+      <textarea id="extraDetails" placeholder="Describe what happened — any expenses you had, communications from the airline, impact on your travel plans, etc."></textarea>
+    </div>
+    <div id="eligibilityPreview" style="margin-bottom:1rem"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep3()">Continue to passenger details →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: PASSENGERS -->
+  <div class="step" id="step3">
+    <div class="step-header">
+      <div class="step-title">Passenger details</div>
+      <div class="step-desc">Each person you travelled with may be entitled to the same compensation amount</div>
+    </div>
+    <div id="eligSummary"></div>
+    <div id="passengersContainer"></div>
+    <button class="add-pax" onclick="addPassenger()" id="addPaxBtn">+ Add another passenger from the same flight</button>
+    <div class="sec-sep">
+      <div class="sec-title">Payment details (optional)</div>
+      <div class="fld">
+        <label class="lbl">Bank account for compensation payment</label>
+        <input type="text" id="bankDetails" placeholder="IBAN or Sort code + Account number e.g. 60-16-13 / 31926819"/>
+        <div class="hint">Some airlines pay directly — including this speeds up payment</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep4()">Review my claim →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: REVIEW -->
+  <div class="step" id="step4">
+    <div class="step-header">
+      <div class="step-title">Review your claim</div>
+      <div class="step-desc">Check everything is correct before generating your documents</div>
+    </div>
+    <div id="reviewContent"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(3)">← Back</button>
+      <button class="btn btn-primary" onclick="generateDocs()">Generate my documents ✈</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: DOCUMENTS -->
+  <div class="step" id="step5">
+    <div class="step-header">
+      <div class="step-title">Your claim documents are ready</div>
+      <div class="step-desc" id="docSubtitle"></div>
+    </div>
+    <div id="totalComp" style="margin-bottom:1.5rem"></div>
+    <div class="tab-bar" id="tabBar"></div>
+    <div id="tabContent"></div>
+  </div>
+
+</div>
+
+<script>
+let curStep = 1;
+let compensation = 0;
+let eligType = '';
+let passengerCount = 1;
+
+// ---- QUICK CALC ----
+function quickCalc() {
+  const issue = document.getElementById('qIssue').value;
+  const dist = document.getElementById('qDist').value;
+  if (!issue || !dist) { alert('Please select both fields.'); return; }
+  let amt = 0, msg = '', color = '';
+  if (issue === 'delay1') { amt = 0; msg = 'Under 2 hours: No cash compensation. You may still claim expenses and a goodwill gesture.'; color = '#854F0B'; }
+  else if (issue === 'delay2') { amt = 0; msg = '2–3 hours: No cash compensation under UK261. But you can claim back meal and transport expenses.'; color = '#854F0B'; }
+  else {
+    if (dist === 'short') amt = 220;
+    else if (dist === 'mid') amt = 350;
+    else amt = issue === 'delay3' ? 260 : 520;
+    msg = `You could be entitled to £${amt} per passenger under UK261.`;
+    color = '#1D9E75';
+  }
+  const r = document.getElementById('calcResult');
+  r.style.display = 'block';
+  r.innerHTML = amt > 0
+    ? `<div class="calc-amt">£${amt}</div><div class="calc-label">${msg}</div><button class="btn btn-primary" style="margin-top:12px" onclick="startClaim()">Start my free claim →</button>`
+    : `<div style="font-size:14px;font-weight:500;color:${color};margin-top:4px">${msg}</div><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="startClaim()">I still want to generate letters →</button>`;
+}
+
+function startClaim() {
+  document.getElementById('step1').scrollIntoView({behavior:'smooth'});
+}
+
+// ---- PROGRESS ----
+function updateProgress(step) {
+  for (let i = 1; i <= 5; i++) {
+    const c = document.getElementById('pc' + i);
+    const n = document.getElementById('pn' + i);
+    if (!c) continue;
+    c.className = 'ps-circle';
+    n.className = 'ps-label';
+    if (i < step) { c.classList.add('done'); c.innerHTML = '✓'; }
+    else if (i === step) { c.classList.add('active'); c.innerHTML = i; n.classList.add('active'); }
+    else { c.innerHTML = i; }
+    const l = document.getElementById('pl' + i);
+    if (l) l.className = 'ps-line' + (i < step ? ' done' : '');
+  }
+}
+
+function goStep(n) {
+  document.getElementById('step' + curStep).classList.remove('active');
+  document.getElementById('step' + n).classList.add('active');
+  curStep = n;
+  updateProgress(n);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ---- TOGGLES ----
+function toggleOther() {
+  document.getElementById('otherAirlineBox').style.display = document.getElementById('airline').value === 'other' ? 'block' : 'none';
+}
+function toggleCustomDist() {
+  document.getElementById('distCustomBox').style.display = document.getElementById('distance').value === 'custom' ? 'block' : 'none';
+}
+function toggleIssueFields() {
+  const v = document.getElementById('issue').value;
+  document.getElementById('delayBlock').style.display = (v === 'delay' || v === 'missed') ? 'block' : 'none';
+  document.getElementById('cancelBlock').style.display = v === 'cancel' ? 'block' : 'none';
+  previewEligibility();
+}
+function checkVoucherWarn() {
+  document.getElementById('voucherWarn').style.display = document.getElementById('airlineOffer').value === 'voucher_signed' ? 'block' : 'none';
+}
+
+// ---- ELIGIBILITY ----
+function getKm() {
+  const v = document.getElementById('distance').value;
+  if (v === 'custom') return parseInt(document.getElementById('distCustomVal').value) || 0;
+  return parseInt(v) || 0;
+}
+function getAirline() {
+  const v = document.getElementById('airline').value;
+  return v === 'other' ? (document.getElementById('otherAirline').value || 'the airline') : v;
+}
+function calcEligibility() {
+  const issue = document.getElementById('issue').value;
+  const delay = parseFloat(document.getElementById('delayHours').value) || 0;
+  const cancelNotice = document.getElementById('cancelNotice').value;
+  const km = getKm();
+  let amt = km <= 1500 ? 220 : km <= 3500 ? 350 : 520;
+  if (issue === 'cancel' && cancelNotice === 'more14') return { type: 'ineligible', amt: 0, reason: 'Cancellations with 14+ days notice are not covered by UK261.' };
+  if ((issue === 'delay' || issue === 'missed') && delay < 3) {
+    if (delay < 2) return { type: 'goodwill', amt: 0 };
+    return { type: 'expenses', amt: 0 };
+  }
+  if (issue === 'delay' && km > 3500 && delay < 4) amt = Math.floor(amt / 2);
+  return { type: 'full', amt };
+}
+function previewEligibility() {
+  const issue = document.getElementById('issue').value;
+  if (!issue) return;
+  const r = calcEligibility();
+  const el = document.getElementById('eligibilityPreview');
+  if (r.type === 'full') el.innerHTML = `<div class="success-card">✅ Based on your details, you appear eligible for <strong>£${r.amt} per passenger</strong> under UK261.</div>`;
+  else if (r.type === 'expenses') el.innerHTML = `<div class="warn-card">⚠️ 2–3 hour delays don't qualify for cash compensation, but you can claim back expenses like meals and transport.</div>`;
+  else if (r.type === 'goodwill') el.innerHTML = `<div class="warn-card">⚠️ Delays under 2 hours have no legal cash compensation. A goodwill letter may still get you vouchers or miles.</div>`;
+  else if (r.type === 'ineligible') el.innerHTML = `<div class="error-card">❌ ${r.reason}</div>`;
+}
+
+// ---- STEP VALIDATORS ----
+function goStep2() {
+  if (!document.getElementById('flightNum').value) { alert('Please enter your flight number.'); return; }
+  if (!document.getElementById('flightDate').value) { alert('Please select your flight date.'); return; }
+  if (!document.getElementById('depAirport').value) { alert('Please enter departure airport.'); return; }
+  if (!document.getElementById('arrAirport').value) { alert('Please enter arrival airport.'); return; }
+  if (!document.getElementById('airline').value) { alert('Please select your airline.'); return; }
+  if (!document.getElementById('bookingRef').value) { alert('Please enter your booking reference.'); return; }
+  if (!document.getElementById('distance').value) { alert('Please select flight distance.'); return; }
+  goStep(2);
+}
+
+function goStep3() {
+  if (!document.getElementById('issue').value) { alert('Please select what happened to your flight.'); return; }
+  const r = calcEligibility();
+  eligType = r.type;
+  compensation = r.amt;
+  buildPassengerForms();
+  const el = document.getElementById('eligSummary');
+  if (r.type === 'full') {
+    el.innerHTML = `<div class="elig-big"><div class="elig-icon">💰</div><div class="elig-amt">£${r.amt}</div><div class="elig-title">Per passenger compensation</div><div class="elig-sub">Under UK Regulation 261/2004 — you keep 100% of this</div></div>`;
+  } else if (r.type === 'expenses') {
+    el.innerHTML = `<div class="elig-big"><div class="elig-icon">🧾</div><div class="elig-title">Expenses reimbursement claim</div><div class="elig-sub" style="margin-top:8px">No fixed cash compensation, but you can reclaim meals, transport and accommodation costs under UK261 Article 9</div></div>`;
+  } else if (r.type === 'goodwill') {
+    el.innerHTML = `<div class="elig-big"><div class="elig-icon">✉️</div><div class="elig-title">Goodwill request</div><div class="elig-sub" style="margin-top:8px">No legal cash compensation for short delays. We'll generate a goodwill letter — airlines respond ~30% of the time with vouchers or miles</div></div>`;
+  }
+  goStep(3);
+}
+
+// ---- PASSENGERS ----
+function buildPassengerForms() {
+  const c = document.getElementById('passengersContainer');
+  if (c.innerHTML !== '') return;
+  c.innerHTML = '';
+  addPassenger();
+}
+
+function addPassenger() {
+  const c = document.getElementById('passengersContainer');
+  const count = c.querySelectorAll('.passenger-card').length + 1;
+  if (count > 6) { alert('Maximum 6 passengers per claim.'); return; }
+  const div = document.createElement('div');
+  div.className = 'passenger-card';
+  div.id = 'pax_' + count;
+  div.innerHTML = `
+    <div class="pax-header">
+      <div class="pax-title">Passenger ${count}</div>
+      ${count > 1 ? `<button class="pax-remove" onclick="removePassenger('pax_${count}')">Remove</button>` : ''}
+    </div>
+    <div class="row2">
+      <div class="fld"><label class="lbl">First name <span class="req">*</span></label><input type="text" id="p${count}_first" placeholder="First name"/></div>
+      <div class="fld"><label class="lbl">Last name <span class="req">*</span></label><input type="text" id="p${count}_last" placeholder="Last name"/></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label class="lbl">Email <span class="req">*</span></label><input type="email" id="p${count}_email" placeholder="email@example.com"/></div>
+      <div class="fld"><label class="lbl">Phone</label><input type="tel" id="p${count}_phone" placeholder="+44 7700 000000"/></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label class="lbl">Date of birth</label><input type="date" id="p${count}_dob"/></div>
+      <div class="fld"><label class="lbl">Nationality</label><input type="text" id="p${count}_nationality" placeholder="e.g. British, Indian"/></div>
+    </div>
+    <div class="row3">
+      <div class="fld"><label class="lbl">Passport number <span class="req">*</span></label><input type="text" id="p${count}_passport" placeholder="e.g. 123456789"/></div>
+      <div class="fld"><label class="lbl">Issuing country</label><input type="text" id="p${count}_passCountry" placeholder="e.g. UK"/></div>
+      <div class="fld"><label class="lbl">Passport expiry</label><input type="date" id="p${count}_passExpiry"/></div>
+    </div>
+    <div class="fld"><label class="lbl">Home address <span class="req">*</span></label><input type="text" id="p${count}_addr" placeholder="Full address including postcode and country"/></div>
+    <div class="fld"><label class="lbl">Ticket number (if known)</label><input type="text" id="p${count}_ticket" placeholder="e.g. 125-1234567890"/></div>
+  `;
+  c.appendChild(div);
+}
+
+function removePassenger(id) {
+  document.getElementById(id).remove();
+}
+
+function getPassengers() {
+  const cards = document.querySelectorAll('.passenger-card');
+  const pax = [];
+  cards.forEach((card, i) => {
+    const n = i + 1;
+    pax.push({
+      name: (document.getElementById('p'+n+'_first')?.value||'') + ' ' + (document.getElementById('p'+n+'_last')?.value||''),
+      first: document.getElementById('p'+n+'_first')?.value||'',
+      last: document.getElementById('p'+n+'_last')?.value||'',
+      email: document.getElementById('p'+n+'_email')?.value||'',
+      phone: document.getElementById('p'+n+'_phone')?.value||'',
+      dob: document.getElementById('p'+n+'_dob')?.value||'',
+      nationality: document.getElementById('p'+n+'_nationality')?.value||'',
+      passport: document.getElementById('p'+n+'_passport')?.value||'',
+      passCountry: document.getElementById('p'+n+'_passCountry')?.value||'',
+      passExpiry: document.getElementById('p'+n+'_passExpiry')?.value||'',
+      addr: document.getElementById('p'+n+'_addr')?.value||'',
+      ticket: document.getElementById('p'+n+'_ticket')?.value||''
+    });
+  });
+  return pax;
+}
+
+function goStep4() {
+  const pax = getPassengers();
+  if (!pax[0].first || !pax[0].last || !pax[0].email) { alert('Please fill in name and email for Passenger 1.'); return; }
+  if (!pax[0].passport) { alert('Passport number is required for Passenger 1.'); return; }
+  if (!pax[0].addr) { alert('Address is required for Passenger 1.'); return; }
+  buildReview(pax);
+  goStep(4);
+}
+
+function buildReview(pax) {
+  const issueMap = {delay:'Flight delay',cancel:'Flight cancellation',denied:'Denied boarding',missed:'Missed connection'};
+  const offerMap = {nothing:'Nothing provided',info:'Information only',meals:'Meals/refreshments',hotel:'Hotel',meals_hotel:'Meals + hotel',voucher:'Voucher',voucher_signed:'Voucher (signed)',partial:'Partial cash',rebooked:'Rebooked'};
+  const reasonMap = {none:'None given',technical:'Technical fault',staff:'Staff issues',weather:'Weather',atc:'ATC restrictions',strike_airline:'Airline strike',strike_other:'Third party strike',other_reason:'Other'};
+  const el = document.getElementById('reviewContent');
+  let html = `<div style="margin-bottom:1.5rem">`;
+  html += `<div class="sec-title">Flight details</div>`;
+  html += `<div class="summary-row"><span class="summary-label">Flight</span><span class="summary-val">${document.getElementById('flightNum').value} — ${document.getElementById('flightDate').value}</span></div>`;
+  html += `<div class="summary-row"><span class="summary-label">Route</span><span class="summary-val">${document.getElementById('depAirport').value} → ${document.getElementById('arrAirport').value}</span></div>`;
+  html += `<div class="summary-row"><span class="summary-label">Airline</span><span class="summary-val">${getAirline()}</span></div>`;
+  html += `<div class="summary-row"><span class="summary-label">Booking ref</span><span class="summary-val">${document.getElementById('bookingRef').value}</span></div>`;
+  html += `</div><div style="margin-bottom:1.5rem">`;
+  html += `<div class="sec-title">Disruption</div>`;
+  html += `<div class="summary-row"><span class="summary-label">Issue</span><span class="summary-val">${issueMap[document.getElementById('issue').value]||''}</span></div>`;
+  html += `<div class="summary-row"><span class="summary-label">Airline reason</span><span class="summary-val">${reasonMap[document.getElementById('airlineReason').value]||''}</span></div>`;
+  html += `<div class="summary-row"><span class="summary-label">Airline provided</span><span class="summary-val">${offerMap[document.getElementById('airlineOffer').value]||''}</span></div>`;
+  html += `<div class="summary-row"><span class="summary-label">Previous contact</span><span class="summary-val">${document.getElementById('prevContact').value === 'no' ? 'No prior contact' : 'Already contacted airline'}</span></div>`;
+  html += `</div><div style="margin-bottom:1.5rem">`;
+  html += `<div class="sec-title">Passengers (${pax.length})</div>`;
+  pax.forEach((p, i) => {
+    html += `<div class="summary-row"><span class="summary-label">Passenger ${i+1}</span><span class="summary-val">${p.name} — ${p.email}</span></div>`;
+  });
+  if (compensation > 0) {
+    html += `<div class="summary-row"><span class="summary-label" style="font-weight:500">Total compensation</span><span class="summary-val" style="color:#1D9E75;font-weight:600">£${compensation * pax.length} (£${compensation} × ${pax.length})</span></div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+// ---- GENERATE DOCS ----
+function generateDocs() {
+  const pax = getPassengers();
+  const d = {
+    flightNum: document.getElementById('flightNum').value,
+    flightDate: document.getElementById('flightDate').value,
+    dep: document.getElementById('depAirport').value,
+    arr: document.getElementById('arrAirport').value,
+    airline: getAirline(),
+    bookingRef: document.getElementById('bookingRef').value,
+    km: getKm(),
+    issue: document.getElementById('issue').value,
+    delay: document.getElementById('delayHours').value,
+    cancelNotice: document.getElementById('cancelNotice').value,
+    reason: document.getElementById('airlineReason').value,
+    offer: document.getElementById('airlineOffer').value,
+    prevContact: document.getElementById('prevContact').value,
+    extra: document.getElementById('extraDetails').value,
+    bank: document.getElementById('bankDetails').value,
+    compensation,
+    pax,
+    today: new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})
+  };
+
+  goStep(5);
+
+  const totalComp = compensation * pax.length;
+  const elTotal = document.getElementById('totalComp');
+  if (compensation > 0) {
+    elTotal.innerHTML = `<div class="success-card">✅ Total potential compensation: <strong>£${totalComp}</strong> for ${pax.length} passenger${pax.length>1?'s':''} — you keep 100% of this</div>`;
+  }
+  document.getElementById('docSubtitle').textContent = compensation > 0
+    ? 'Your personalised claim letters are ready. Follow the steps to get your compensation.'
+    : 'Your letters are ready. Follow the steps below.';
+
+  const reasonMap = {none:'No reason was given',technical:'a technical/mechanical fault',staff:'staff shortage or crew issues',weather:'weather conditions',atc:'air traffic control restrictions',strike_airline:'an airline staff strike',strike_other:'a third-party strike',other_reason:'an unspecified reason'};
+  const offerMap = {nothing:'provided no assistance',info:'provided information updates only',meals:'provided meals/refreshments',hotel:'provided hotel accommodation',meals_hotel:'provided meals and hotel accommodation',voucher:'offered a travel voucher',voucher_signed:'offered a travel voucher which I accepted and signed for',partial:'made a partial cash payment',rebooked:'rebooked me on a later flight'};
+  const prevMap = {no:'I have not yet contacted you directly regarding compensation.',ignored:'I previously submitted a compensation claim which you failed to respond to.',rejected:'I previously submitted a compensation claim which you rejected without adequate legal basis.',pending:'I previously submitted a compensation claim and am still awaiting your response.'};
+
+  // Build letters for each passenger
+  const tabs = [];
+  const contents = [];
+
+  if (compensation > 0) {
+    // CLAIM LETTERS
+    pax.forEach((p, i) => {
+      const tabId = 'pax_letter_' + i;
+      tabs.push({ id: tabId, label: pax.length > 1 ? `Claim letter — ${p.first}` : 'Claim letter' });
+      const letter = `${d.today}
+
+${p.name}
+${p.addr}
+${p.email}${p.phone ? '\n' + p.phone : ''}
+
+Customer Relations Department
+${d.airline}
+
+Re: Formal Compensation Claim — UK Regulation 261/2004 (UK261)
+Flight: ${d.flightNum} | Date: ${d.flightDate}
+Route: ${d.dep} → ${d.arr}
+Booking Reference: ${d.bookingRef}${p.ticket ? '\nTicket Number: ' + p.ticket : ''}
+Passport Number: ${p.passport}${p.passCountry ? ' (' + p.passCountry + ')' : ''}
+
+Dear Customer Relations Team,
+
+I am writing to formally claim statutory compensation under UK Regulation 261/2004 (UK261) in respect of the disruption to the above flight.
+
+DISRUPTION SUMMARY
+On ${d.flightDate}, I was a ticketed passenger on flight ${d.flightNum} operated by ${d.airline} from ${d.dep} to ${d.arr}. The flight experienced ${d.issue === 'delay' ? `a significant delay, resulting in my arrival at ${d.arr} approximately ${d.delay}+ hours after the scheduled arrival time` : d.issue === 'cancel' ? 'a cancellation' : d.issue === 'denied' ? 'denied boarding due to overbooking' : 'a disruption resulting in a missed connection'}. The reason given by your airline was ${reasonMap[d.reason] || 'not provided'}. Your airline ${offerMap[d.offer] || 'provided no assistance'}.${d.extra ? '\n\n' + d.extra : ''}
+
+LEGAL ENTITLEMENT
+Under Article 7 of UK Regulation 261/2004, passengers are entitled to fixed compensation where flight disruptions occur due to circumstances within the airline's control. This flight departed from ${d.dep}, a UK airport, and is therefore fully subject to UK261 regardless of the passenger's nationality or the airline's country of registration.${d.reason === 'weather' || d.reason === 'atc' ? '\n\nI note that airlines frequently cite weather or ATC as "extraordinary circumstances" to avoid their legal obligations. I reserve the right to request full evidence of the specific circumstances affecting my flight and how they directly caused my disruption.' : ''}
+
+Based on the flight distance of approximately ${d.km} km, I am entitled to the following compensation:
+→ £${d.compensation} per passenger under UK261 Article 7
+
+COMPENSATION REQUESTED
+I formally request payment of £${d.compensation} in full within 14 days of this letter.${d.bank ? '\n\nPlease transfer compensation to:\n' + d.bank : ''}
+
+${prevMap[d.prevContact] || ''}
+
+Should I not receive a satisfactory response within 14 days, I will escalate this matter to the Civil Aviation Authority (CAA) and an approved Alternative Dispute Resolution scheme (CEDR or AviationADR) without further notice. I reserve the right to pursue this claim through the Small Claims Court if necessary, where I will also seek recovery of filing fees.
+
+Yours sincerely,
+
+${p.name}
+Passport: ${p.passport}
+Date: ${d.today}`;
+      contents.push({ id: tabId, type: 'letter', text: letter, filename: `claim-letter-${p.first.toLowerCase()}.txt` });
+    });
+
+    // CAA LETTER
+    const caaId = 'tab_caa';
+    tabs.push({ id: caaId, label: 'CAA complaint' });
+    const paxNames = pax.map(p => p.name).join(', ');
+    const caaLetter = `${d.today}
+
+${pax[0].name}
+${pax[0].addr}
+${pax[0].email}
+
+Passenger Complaints Team
+Civil Aviation Authority
+CAA House, 45-59 Kingsway
+London WC2B 6TE
+
+Re: Unresolved UK261 Compensation Dispute — ${d.airline}
+Flight: ${d.flightNum} | Date: ${d.flightDate} | Route: ${d.dep} → ${d.arr}
+Booking Reference: ${d.bookingRef}
+Passengers: ${paxNames}
+
+Dear Civil Aviation Authority,
+
+I am writing to request your formal intervention in an unresolved compensation dispute with ${d.airline} under UK Regulation 261/2004.
+
+BACKGROUND
+On ${d.flightDate}, I and ${pax.length > 1 ? pax.length - 1 + ' other passenger(s)' : 'one other passenger'} travelled on flight ${d.flightNum} from ${d.dep} to ${d.arr}, operated by ${d.airline}. The flight experienced a ${d.issue === 'delay' ? `delay of ${d.delay}+ hours` : d.issue === 'cancel' ? 'cancellation' : d.issue === 'denied' ? 'denied boarding' : 'disruption causing missed connection'}, entitling each passenger to £${d.compensation} compensation under UK261. Total compensation owed: £${totalComp}.
+
+STEPS ALREADY TAKEN
+I sent a formal written claim to ${d.airline} citing UK261 and requesting £${totalComp} in total. ${d.prevContact === 'ignored' ? 'The airline has failed to respond.' : d.prevContact === 'rejected' ? 'The airline rejected the claim without adequate legal justification.' : 'The statutory 8-week response period has now elapsed without satisfactory resolution.'}
+
+I have enclosed a copy of my original claim letter and supporting flight details for your reference.
+
+REQUEST TO CAA
+I respectfully request that the CAA:
+1. Formally investigate ${d.airline}'s handling and non-compliance with UK261
+2. Require ${d.airline} to pay the £${totalComp} compensation owed
+3. Confirm the CAA's enforcement position on this matter
+
+I am prepared to proceed to CEDR or AviationADR, and subsequently to Small Claims Court, if required.
+
+Yours sincerely,
+
+${pax[0].name}
+Date: ${d.today}`;
+    contents.push({ id: caaId, type: 'letter', text: caaLetter, filename: 'caa-complaint.txt' });
+  }
+
+  // EXPENSES (for short delays)
+  if (eligType === 'expenses' || eligType === 'goodwill') {
+    const expId = 'tab_exp';
+    tabs.push({ id: expId, label: eligType === 'goodwill' ? 'Goodwill letter' : 'Expenses claim' });
+    const expLetter = eligType === 'expenses'
+      ? `${d.today}
+
+${pax[0].name}
+${pax[0].addr}
+${pax[0].email}
+
+Customer Relations Department
+${d.airline}
+
+Re: Expenses Reimbursement Claim — Flight ${d.flightNum}, ${d.flightDate}
+Booking Reference: ${d.bookingRef}
+
+Dear Customer Relations Team,
+
+I am writing to claim reimbursement of reasonable out-of-pocket expenses under Article 9 of UK Regulation 261/2004, incurred as a result of the disruption to flight ${d.flightNum} on ${d.flightDate} from ${d.dep} to ${d.arr}.
+
+Under UK261 Article 9, regardless of whether a delay qualifies for fixed compensation, passengers are legally entitled to reimbursement of meals, refreshments, and communication costs during the disruption. As your airline ${offerMap[d.offer] || 'provided no assistance'}, I was required to cover these costs myself.
+
+EXPENSES CLAIMED (please complete with actual amounts and attach receipts):
+- Meals and refreshments during delay: £ ______
+- Transport to/from alternative accommodation: £ ______
+- Hotel accommodation (if overnight): £ ______
+- Reasonable communication costs: £ ______
+- Other reasonable costs: £ ______
+
+TOTAL CLAIMED: £ ______
+
+Please reimburse to: ${d.bank || '[Insert bank details]'}
+
+I request your response within 14 days.
+
+Yours sincerely,
+${pax[0].name}
+Date: ${d.today}`
+      : `${d.today}
+
+${pax[0].name}
+${pax[0].addr}
+${pax[0].email}
+
+Customer Relations Team
+${d.airline}
+
+Re: Goodwill Request — Flight ${d.flightNum}, ${d.flightDate}
+Booking Reference: ${d.bookingRef}
+
+Dear Customer Relations Team,
+
+I am writing regarding the disruption to flight ${d.flightNum} on ${d.flightDate} from ${d.dep} to ${d.arr}, which caused me considerable inconvenience and frustration.
+
+While I understand the delay duration may not meet the threshold for statutory compensation under UK261, I was a ticketed passenger whose journey was significantly disrupted. [Please describe personal impact — missed meetings, events, connecting plans, etc.]
+
+I have been a passenger with ${d.airline} and would appreciate a goodwill gesture in recognition of the experience — such as travel credit, air miles, or an upgrade consideration on a future booking.
+
+I hope to continue flying with ${d.airline} and look forward to your response.
+
+Yours sincerely,
+${pax[0].name}
+Date: ${d.today}`;
+    contents.push({ id: expId, type: 'letter', text: expLetter, filename: eligType === 'goodwill' ? 'goodwill-letter.txt' : 'expenses-claim.txt' });
+  }
+
+  // GUIDE
+  const guideId = 'tab_guide';
+  tabs.push({ id: guideId, label: 'What to do next' });
+  contents.push({ id: guideId, type: 'guide', compensation, pax: pax.length, airline: d.airline, prevContact: d.prevContact });
+
+  // BUILD UI
+  const tabBar = document.getElementById('tabBar');
+  const tabContent = document.getElementById('tabContent');
+  tabBar.innerHTML = '';
+  tabContent.innerHTML = '';
+
+  tabs.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = t.label;
+    btn.onclick = () => switchTab(t.id, tabs);
+    tabBar.appendChild(btn);
+  });
+
+  contents.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.id = 'tc_' + c.id;
+    div.style.display = i === 0 ? 'block' : 'none';
+    if (c.type === 'letter') {
+      div.innerHTML = `<div class="doc-letter" id="ltr_${c.id}">${c.text}</div><div class="btn-row"><button class="btn" onclick="copyLetter('ltr_${c.id}',this,'Copy letter')">Copy letter</button><button class="btn" onclick="dlText('ltr_${c.id}','${c.filename}')">Download .txt</button>${c.id === 'tab_caa' ? `<button class="btn btn-ghost" onclick="window.open('https://www.caa.co.uk/passengers-and-public/resolving-travel-problems/resolving-airline-complaints/how-to-complain/','_blank')">CAA website ↗</button>` : ''}</div>`;
+    } else {
+      const isFullClaim = eligType === 'full';
+      div.innerHTML = `
+        <div class="guide-step"><div class="gs-num done">1</div><div class="gs-body"><div class="gs-title">Email the claim letter to ${d.airline}</div><div class="gs-desc">Find their customer service email on their website. Use subject: "UK261 Compensation Claim — ${d.flightNum}". Keep a copy and note the exact date sent.</div></div></div>
+        ${isFullClaim ? `
+        <div class="guide-step"><div class="gs-num">2</div><div class="gs-body"><div class="gs-title">Wait up to 8 weeks</div><div class="gs-desc">Airlines are legally required to respond within 8 weeks. If they pay — done. If they ignore or reject — move to step 3.</div></div></div>
+        <div class="guide-step"><div class="gs-num">3</div><div class="gs-body"><div class="gs-title">No response? File the CAA complaint</div><div class="gs-desc">Submit the CAA complaint letter using the tab above. The Civil Aviation Authority is a government regulator — airlines must respond to them. Fully online, takes 10 minutes.</div><a class="gs-link" href="https://www.caa.co.uk/passengers-and-public/resolving-travel-problems/resolving-airline-complaints/how-to-complain/" target="_blank">Open CAA complaints portal ↗</a></div></div>
+        <div class="guide-step"><div class="gs-num">4</div><div class="gs-body"><div class="gs-title">Escalate to CEDR or AviationADR</div><div class="gs-desc">Free government-backed dispute resolution. Decisions are legally binding on the airline. Fully online — no lawyers, no fees.</div><a class="gs-link" href="https://www.cedr.com/aviation" target="_blank">CEDR Aviation ↗</a> &nbsp; <a class="gs-link" href="https://www.aviationadr.org.uk" target="_blank">AviationADR ↗</a></div></div>
+        <div class="guide-step"><div class="gs-num">5</div><div class="gs-body"><div class="gs-title">Last resort: Small Claims Court</div><div class="gs-desc">File online at gov.uk. £35 fee, refunded if you win. No physical appearance needed for most cases. Takes 5 minutes to file.</div><a class="gs-link" href="https://www.gov.uk/make-court-claim-for-money" target="_blank">File online ↗</a></div></div>
+        ` : `
+        <div class="guide-step"><div class="gs-num">2</div><div class="gs-body"><div class="gs-title">Send the expenses claim letter</div><div class="gs-desc">Attach your receipts — meals, transport, accommodation. Airlines must reimburse these under UK261 Article 9 even for short delays.</div></div></div>
+        <div class="guide-step"><div class="gs-num">3</div><div class="gs-body"><div class="gs-title">Refused expenses? Escalate to CAA</div><div class="gs-desc">Expense reimbursement is also protected under UK261. You can still escalate through the CAA if the airline refuses.</div></div></div>
+        `}`;
+    }
+    tabContent.appendChild(div);
+  });
+}
+
+function switchTab(activeId, tabs) {
+  tabs.forEach((t, i) => {
+    const tc = document.getElementById('tc_' + t.id);
+    if (tc) tc.style.display = t.id === activeId ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', tabs[i]?.id === activeId);
+  });
+}
+
+function copyLetter(id, btn, label) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = label, 2000);
+  });
+}
+
+function dlText(id, filename) {
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(document.getElementById(id).textContent);
+  a.download = filename;
+  a.click();
+}
+
+// Init
+updateProgress(1);
+buildPassengerForms();
+document.getElementById('passengersContainer').innerHTML = '';
+</script>
+</body>
+</html>
